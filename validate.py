@@ -16,20 +16,31 @@ params = {
 }
 
 ELEMENT_SHAPE = (4, 73334, 1)
+RET_SEQ=False
 
 net = tf.keras.models.load_model(f"ckpt/{str(params)}")
 net.summary()
 while True:
-    seq = sample(
-        net,
-        ELEMENT_SHAPE,
-        params["DIFF_STEPS"],
-        return_sequence=True
-    )
-    for i,x in enumerate(seq[-10:]):
-        print(f"----------\nDIFFUSION STEP {i:2d}----------\n")
-        for i in range(x.shape[0]):
-            wav = get_wav(x[i],SR//params["DOWNSAMPLE"])
-            subprocess.run(["ffplay","-"],input=wav.numpy())
+    if RET_SEQ:
+        seq = sample(
+            net,
+            ELEMENT_SHAPE,
+            params["DIFF_STEPS"],
+            return_sequence=True
+        )
+        for i,x in enumerate(seq[-10:]):
+            print(f"----------\nDIFFUSION STEP {i:2d}----------\n")
+            for i in range(x.shape[0]):
+                wav = get_wav(x[i],SR//params["DOWNSAMPLE"])
+                subprocess.run(["ffplay","-"],input=wav.numpy())
 
-    print("\n\n")
+        print("\n\n")
+    else:
+        x = sample(
+            net,
+            ELEMENT_SHAPE,
+            params["DIFF_STEPS"],
+            return_sequence=False
+        )
+        wav = get_wav(x[0],SR//params["DOWNSAMPLE"])
+        subprocess.run(["ffplay","-"],input=wav.numpy())

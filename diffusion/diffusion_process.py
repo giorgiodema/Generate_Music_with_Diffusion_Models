@@ -107,7 +107,7 @@ def sample(model,shape,diffusion_steps,return_sequence=False,step_emb_dim:int=12
         t = diffusion_steps - 1 - i
         t_enc = encode(t,step_emb_dim)
         eps_theta = model([x_t,t_enc])
-        mu = 1./tf.math.sqrt(alpha_hat[t]) * (x_t - (beta[t]/tf.math.sqrt(1.-alpha_hat[t]))*eps_theta)
+        mu = 1./tf.math.sqrt(alpha[t]) * (x_t - (beta[t]/tf.math.sqrt(1.-alpha_hat[t]))*eps_theta)
         sigma = tf.math.sqrt(beta_hat[t])
         dist = MultivariateNormalDiag(loc=mu,scale_identity_multiplier=sigma)
         x_prec = dist.sample()
