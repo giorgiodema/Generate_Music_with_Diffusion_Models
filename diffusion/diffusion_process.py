@@ -160,8 +160,8 @@ def train_single_sample(x_0:tf.Tensor,
                 "Training loss [step: %5d/%5d] = %.4f"
                 % (step,training_steps, float(l))
             )
-        with open(f"test/{model_name}.txt","a") as f:
-            f.write(f"{l},")
+            with open(f"test/{model_name}.txt","a") as f:
+                f.write(f"{l},")
 
 
 def backward_process(model,shape,diffusion_steps,return_sequence=False,step_emb_dim:int=128):
