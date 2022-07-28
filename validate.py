@@ -22,7 +22,7 @@ net = tf.keras.models.load_model(f"ckpt/{str(params)}")
 net.summary()
 while True:
     if RET_SEQ:
-        seq = sample(
+        seq = backward_process(
             net,
             ELEMENT_SHAPE,
             params["DIFF_STEPS"],
@@ -36,7 +36,7 @@ while True:
 
         print("\n\n")
     else:
-        x = sample(
+        x = backward_process(
             net,
             ELEMENT_SHAPE,
             params["DIFF_STEPS"],

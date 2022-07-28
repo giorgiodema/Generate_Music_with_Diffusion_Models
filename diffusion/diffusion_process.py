@@ -46,6 +46,10 @@ def get_alpha_hat(alpha):
     alpha_hat = tf.stack(alpha_hat)
     return alpha_hat
         
+def forward(x_0,alpha_hat,t):
+    eps = sample_gaussian_noise(tf.shape(x_0))
+    inp = tf.math.sqrt(alpha_hat[t]) * x_0 + tf.math.sqrt(1. - alpha_hat[t]) * eps
+    return inp
 
 def train(  data:tf.data.Dataset, 
             diffusion_steps:int,
@@ -67,7 +71,7 @@ def train(  data:tf.data.Dataset,
         for step, x_0 in enumerate(data):
             t = sample_diffusion_step(diffusion_steps)
             eps = sample_gaussian_noise(tf.shape(x_0))
-            inp = tf.math.sqrt(alpha_hat[t]) * x_0 + tf.math.sqrt(1. - alpha_hat[t]) * eps
+            inp = forward(x_0,alpha_hat,t)
             t_enc = encode(t,step_emb_dim)
             with tf.GradientTape() as tape:
                 o = model([inp,t_enc])
@@ -93,7 +97,7 @@ def train(  data:tf.data.Dataset,
             model.save(f"ckpt/{model_name}")
 
 
-def sample(model,shape,diffusion_steps,return_sequence=False,step_emb_dim:int=128,):
+def backward_process(model,shape,diffusion_steps,return_sequence=False,step_emb_dim:int=128):
     """
     sample from noise, the sample shape should be (bs,seq_len)
     """
@@ -102,15 +106,20 @@ def sample(model,shape,diffusion_steps,return_sequence=False,step_emb_dim:int=12
     beta = variance_schedule(diffusion_steps)
     alpha = get_alpha(beta)
     alpha_hat = get_alpha_hat(alpha)
-    beta_hat = get_beta_hat(alpha_hat,beta)
-    for i in range(diffusion_steps - 1):
+    #beta_hat = get_beta_hat(alpha_hat,beta)
+    for i in range(diffusion_steps):
         t = diffusion_steps - 1 - i
+        z = tf.random.normal(shape) if t > 0 else \
+            tf.zeros(shape)
         t_enc = encode(t,step_emb_dim)
         eps_theta = model([x_t,t_enc])
-        mu = 1./tf.math.sqrt(alpha[t]) * (x_t - (beta[t]/tf.math.sqrt(1.-alpha_hat[t]))*eps_theta)
-        sigma = tf.math.sqrt(beta_hat[t])
-        dist = MultivariateNormalDiag(loc=mu,scale_identity_multiplier=sigma)
-        x_prec = dist.sample()
+        #mu = 1./tf.math.sqrt(alpha[t]) * (x_t - (beta[t]/tf.math.sqrt(1.-alpha_hat[t]))*eps_theta)
+        #sigma = tf.math.sqrt(beta_hat[t])
+        #dist = MultivariateNormalDiag(loc=mu,scale_identity_multiplier=sigma)
+        #x_prec = dist.sample()
+        x_prec = 1./tf.math.sqrt(alpha[t]) * \
+            (x_t - (1. - alpha[t])/(tf.math.sqrt(1.-alpha_hat[t])) * eps_theta ) + \
+                 tf.math.sqrt(beta[t])*z
         x_t = x_prec
         if return_sequence:
             samples.append(x_prec)
@@ -118,6 +127,38 @@ def sample(model,shape,diffusion_steps,return_sequence=False,step_emb_dim:int=12
         return samples
     else:
         return x_prec
+
+def backward_process_from(model,shape,diffusion_steps,x_start,t_start,return_sequence=False,step_emb_dim:int=128):
+    """
+    sample from noise, the sample shape should be (bs,seq_len)
+    """
+    samples = []
+    x_t = x_start
+    beta = variance_schedule(diffusion_steps)
+    alpha = get_alpha(beta)
+    alpha_hat = get_alpha_hat(alpha)
+    #beta_hat = get_beta_hat(alpha_hat,beta)
+    for i in range(0,t_start+1):
+        t = t_start - i
+        z = tf.random.normal(shape) if t > 0 else \
+            tf.zeros(shape)
+        t_enc = encode(t,step_emb_dim)
+        eps_theta = model([x_t,t_enc])
+        #mu = 1./tf.math.sqrt(alpha[t]) * (x_t - (beta[t]/tf.math.sqrt(1.-alpha_hat[t]))*eps_theta)
+        #sigma = tf.math.sqrt(beta_hat[t])
+        #dist = MultivariateNormalDiag(loc=mu,scale_identity_multiplier=sigma)
+        #x_prec = dist.sample()
+        x_prec = 1./tf.math.sqrt(alpha[t]) * \
+            (x_t - (1. - alpha[t])/(tf.math.sqrt(1.-alpha_hat[t])) * eps_theta ) + \
+                 tf.math.sqrt(beta[t])*z
+        x_t = x_prec
+        if return_sequence:
+            samples.append(x_prec)
+    if return_sequence:
+        return samples
+    else:
+        return x_prec
+
 
     
 if __name__=="__main__":
