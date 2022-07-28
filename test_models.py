@@ -33,7 +33,7 @@ for net in nets:
             net,
             tf.keras.optimizers.Adam(learning_rate=2*10**-4),
             str(net.name),
-            training_steps=100
+            training_steps=10**6
         )
         net.save_weights(f"test/model_test/{net.name}")
 
