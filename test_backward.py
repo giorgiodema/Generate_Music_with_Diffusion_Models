@@ -7,6 +7,7 @@ import subprocess
 
 START_STEP = 50
 ELEMENT_SHAPE = (4, 73334, 1)
+PREFIX="__best__"#"__last__"
 
 params = {
     "BS":4,
@@ -22,7 +23,7 @@ ds = get_unlabelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=pa
 it = iter(ds)
 x_0 = next(it)
 
-net = tf.keras.models.load_model(f"ckpt/{str(params)}")
+net = tf.keras.models.load_model(f"ckpt/{PREFIX}{str(params)}")
 net.summary()
 
 print("----------------- ORIGINAL -----------------")

@@ -11,7 +11,7 @@ params = {
     "DEPTH":6,
     "CHANNELS":64,
     "KERNEL_SIZE":3,
-    "NSPLITS":3,
+    "NSPLITS":6,
     "DOWNSAMPLE":3
 }
 

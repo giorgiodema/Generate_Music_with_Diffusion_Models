@@ -6,12 +6,12 @@ import os
 
 tf.get_logger().setLevel('ERROR')
 params = {
-    "BS":4,
+    "BS":8,
     "DIFF_STEPS":1000,
     "DEPTH":6,
     "CHANNELS":64,
     "KERNEL_SIZE":3,
-    "NSPLITS":3,
+    "NSPLITS":6,
     "DOWNSAMPLE":3
 }
 

@@ -17,8 +17,9 @@ params = {
 
 ELEMENT_SHAPE = (4, 73334, 1)
 RET_SEQ=False
+PREFIX="__best__" #"__last__"
 
-net = tf.keras.models.load_model(f"ckpt/{str(params)}")
+net = tf.keras.models.load_model(f"ckpt/{PREFIX}{str(params)}")
 net.summary()
 while True:
     if RET_SEQ:

@@ -67,34 +67,40 @@ def train(  data:tf.data.Dataset,
     curr_ep_loss = tf.zeros_like(best_ep_loss)
     
     for ep in range(epochs):
-        # sample x_0 from qdata and eps from N_0_1
-        for step, x_0 in enumerate(data):
-            t = sample_diffusion_step(diffusion_steps)
-            eps = sample_gaussian_noise(tf.shape(x_0))
-            inp = forward(x_0,alpha_hat,t)
-            t_enc = encode(t,step_emb_dim)
-            with tf.GradientTape() as tape:
-                o = model([inp,t_enc])
-                l = tf.norm(eps-o,ord=2)
-                l = tf.reduce_mean(l)
-            grads = tape.gradient(l, model.trainable_weights)
-            opt.apply_gradients(zip(grads, model.trainable_weights))
-            curr_ep_loss += l
+        try:
+            # sample x_0 from qdata and eps from N_0_1
+            for step, x_0 in enumerate(data):
+                t = sample_diffusion_step(diffusion_steps)
+                eps = sample_gaussian_noise(tf.shape(x_0))
+                inp = forward(x_0,alpha_hat,t)
+                t_enc = encode(t,step_emb_dim)
+                with tf.GradientTape() as tape:
+                    o = model([inp,t_enc])
+                    l = tf.norm(eps-o,ord=2)
+                    l = tf.reduce_mean(l)
+                grads = tape.gradient(l, model.trainable_weights)
+                opt.apply_gradients(zip(grads, model.trainable_weights))
+                # tf.reduce_sum(tf.concat(list(map(lambda x:tf.abs(tf.reshape(x,-1)),list(filter(lambda x:x!=None,grads)))),axis=0))
+                curr_ep_loss += l
 
-            # Log every print_every batches.
-            if step % print_every == 0:
-                tf.print(
-                    "Training loss [step: %5d, ep: %5d] = %.4f"
-                    % (step,ep, float(l))
-                )
-        curr_ep_loss = curr_ep_loss / (step + 1)
-        tf.print("------------------------------")
-        tf.print("EPOCH LOSS: %4f"%(curr_ep_loss))
-        if curr_ep_loss < best_ep_loss:
-            tf.print("Loss decreased: %4f --> %4f"%(best_ep_loss,curr_ep_loss))
-            best_ep_loss = curr_ep_loss
-            curr_ep_loss = tf.zeros_like(best_ep_loss)
-            model.save(f"ckpt/{model_name}")
+                # Log every print_every batches.
+                if step % print_every == 0:
+                    tf.print(
+                        "Training loss [step: %5d, ep: %5d] = %.4f"
+                        % (step,ep, float(l))
+                    )
+            curr_ep_loss = curr_ep_loss / (step + 1)
+            tf.print("------------------------------")
+            tf.print("EPOCH LOSS: %4f"%(curr_ep_loss))
+            #with open(f"log/{model_name}.txt","a") as f:
+            #    f.write(f"{curr_ep_loss}\n")
+            if curr_ep_loss < best_ep_loss:
+                tf.print("Loss decreased: %4f --> %4f"%(best_ep_loss,curr_ep_loss))
+                best_ep_loss = curr_ep_loss
+                curr_ep_loss = tf.zeros_like(best_ep_loss)
+                model.save(f"ckpt/__best__{model_name}")
+        except KeyboardInterrupt:
+            model.save(f"ckpt/__last__{model_name}")
 
 
 def backward_process(model,shape,diffusion_steps,return_sequence=False,step_emb_dim:int=128):
