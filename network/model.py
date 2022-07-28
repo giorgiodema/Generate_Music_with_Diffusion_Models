@@ -55,7 +55,7 @@ class DiffWaveNet(tf.keras.Model):
         input = inputs[0]
         step_embedding = inputs[1]
         input = self.input_conv(input)                             # (B,L,C)
-        emb = self.dens_emb_1(emb)
+        emb = self.dens_emb_1(step_embedding)
         emb = self.dens_emb_2(emb)
         res_input = input
         skip_outputs = tf.TensorArray(
