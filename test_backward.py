@@ -4,20 +4,12 @@ from data.dataset import *
 import tensorflow as tf
 import os
 import subprocess
+from params import params
 
 START_STEP = 50
 ELEMENT_SHAPE = (4, 73334, 1)
 PREFIX="__best__"#"__last__"
-
-params = {
-    "BS":4,
-    "DIFF_STEPS":1000,
-    "DEPTH":6,
-    "CHANNELS":64,
-    "KERNEL_SIZE":3,
-    "NSPLITS":3,
-    "DOWNSAMPLE":3
-}
+ELEMENT_SHAPE = (params["BS"],params["SR"]//params["NSPLITS"],1)
 
 ds = get_unlabelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"])
 it = iter(ds)

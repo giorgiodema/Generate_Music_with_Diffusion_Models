@@ -92,8 +92,8 @@ def train(  data:tf.data.Dataset,
             curr_ep_loss = curr_ep_loss / (step + 1)
             tf.print("------------------------------")
             tf.print("EPOCH LOSS: %4f"%(curr_ep_loss))
-            #with open(f"log/{model_name}.txt","a") as f:
-            #    f.write(f"{curr_ep_loss}\n")
+            with open(f"log/{model_name}.txt","a") as f:
+                f.write(f"{curr_ep_loss}\n")
             if curr_ep_loss < best_ep_loss:
                 tf.print("Loss decreased: %4f --> %4f"%(best_ep_loss,curr_ep_loss))
                 best_ep_loss = curr_ep_loss

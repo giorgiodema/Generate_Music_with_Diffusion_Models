@@ -18,7 +18,7 @@ class ResidualLayer(tf.keras.Model):
         input = inputs[0]
         step_embedding = inputs[1]
         emb = self.fc_emb(step_embedding)               # (B,C)
-        emb = tf.expand_dims(emb,1)                    # (B,1,C)
+        emb = tf.expand_dims(emb,1)                     # (B,1,C)
         emb = tf.repeat(
             emb,
             repeats=tf.shape(input)[1],
@@ -32,7 +32,7 @@ class ResidualLayer(tf.keras.Model):
         o = tanh * sigm
         res_out = self.res_conv(o)
         res_out = input + res_out                             # (B,L,C)
-        skip_out = self.skip_conv(o)                                    # (B,L,C)
+        skip_out = self.skip_conv(o)                          # (B,L,C)
         return res_out,skip_out
 
 

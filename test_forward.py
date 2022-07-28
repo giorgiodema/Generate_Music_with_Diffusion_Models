@@ -4,16 +4,7 @@ from data.dataset import *
 import tensorflow as tf
 import os
 import subprocess
-
-params = {
-    "BS":4,
-    "DIFF_STEPS":1000,
-    "DEPTH":6,
-    "CHANNELS":64,
-    "KERNEL_SIZE":3,
-    "NSPLITS":6,
-    "DOWNSAMPLE":3
-}
+from params import params
 
 ds = get_unlabelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"])
 it = iter(ds)
