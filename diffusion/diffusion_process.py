@@ -114,6 +114,55 @@ def train(  data:tf.data.Dataset,
         except KeyboardInterrupt:
             model.save(f"ckpt/__last__{model_name}")
 
+    
+def train_single_sample(x_0:tf.Tensor, 
+            diffusion_steps:int,
+            model:tf.keras.Model,
+            opt:tf.keras.optimizers.Optimizer,
+            model_name:str,
+            step_emb_dim:int=128,
+            training_steps=10000,
+            print_every=10):
+
+    beta = variance_schedule(diffusion_steps)
+    alpha = get_alpha(beta)
+    alpha_hat = get_alpha_hat(alpha)
+    best_ep_loss = tf.convert_to_tensor(np.inf)
+    curr_ep_loss = tf.zeros_like(best_ep_loss)
+    
+
+    for step in range(training_steps):
+        t = sample_diffusion_step(diffusion_steps)
+        inp,eps = forward(x_0,alpha_hat,t)
+        # DEBUG #
+        #wav = get_wav(inp[0],SR//params["DOWNSAMPLE"])
+        #subprocess.run(["ffplay","-"],input=wav.numpy())
+        # DEBUG #
+        t_enc = encode(t,step_emb_dim)
+        t_enc = tf.expand_dims(t_enc,0)                  
+        t_enc = tf.repeat(t_enc,tf.shape(x_0)[0],axis=0) 
+        with tf.GradientTape() as tape:
+            o = model([inp,t_enc])
+            # DEBUG #
+            #wav = get_wav(o[0],SR//params["DOWNSAMPLE"])
+            #subprocess.run(["ffplay","-"],input=wav.numpy())
+            # DEBUG #
+            l = tf.norm(eps-o,ord=2)
+            l = tf.reduce_mean(l)
+        grads = tape.gradient(l, model.trainable_weights)
+        opt.apply_gradients(zip(grads, model.trainable_weights))
+        # tf.reduce_sum(tf.concat(list(map(lambda x:tf.abs(tf.reshape(x,-1)),list(filter(lambda x:x!=None,grads)))),axis=0))
+        curr_ep_loss += l
+
+        # Log every print_every batches.
+        if step % print_every == 0:
+            tf.print(
+                "Training loss [step: %5d/%5d] = %.4f"
+                % (step,training_steps, float(l))
+            )
+        with open(f"test/{model_name}.txt","a") as f:
+            f.write(f"{l},")
+
 
 def backward_process(model,shape,diffusion_steps,return_sequence=False,step_emb_dim:int=128):
     """
@@ -130,6 +179,8 @@ def backward_process(model,shape,diffusion_steps,return_sequence=False,step_emb_
         z = tf.random.normal(shape) if t > 0 else \
             tf.zeros(shape)
         t_enc = encode(t,step_emb_dim)
+        t_enc = tf.expand_dims(t_enc,0)                  
+        t_enc = tf.repeat(t_enc,tf.shape(x_t)[0],axis=0) 
         eps_theta = model([x_t,t_enc])
         #mu = 1./tf.math.sqrt(alpha[t]) * (x_t - (beta[t]/tf.math.sqrt(1.-alpha_hat[t]))*eps_theta)
         #sigma = tf.math.sqrt(beta_hat[t])
@@ -161,6 +212,8 @@ def backward_process_from(model,shape,diffusion_steps,x_start,t_start,return_seq
         z = tf.random.normal(shape) if t > 0 else \
             tf.zeros(shape)
         t_enc = encode(t,step_emb_dim)
+        t_enc = tf.expand_dims(t_enc,0)                  
+        t_enc = tf.repeat(t_enc,tf.shape(x_t)[0],axis=0) 
         eps_theta = model([x_t,t_enc])
         #mu = 1./tf.math.sqrt(alpha[t]) * (x_t - (beta[t]/tf.math.sqrt(1.-alpha_hat[t]))*eps_theta)
         #sigma = tf.math.sqrt(beta_hat[t])

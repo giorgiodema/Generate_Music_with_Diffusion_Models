@@ -8,8 +8,7 @@ from params import params
 tf.get_logger().setLevel('ERROR')
 
 ELEMENT_SHAPE = (params["BS"],(params["SR"]//params["NSPLITS"])//params["DOWNSAMPLE"]+1,1)
-#net = DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
-net = DnCNN((ELEMENT_SHAPE[1],1),nlayers=18)
+net = DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
 train(
     get_unlabelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"]),
     params["DIFF_STEPS"],

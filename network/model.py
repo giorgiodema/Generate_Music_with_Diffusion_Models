@@ -84,7 +84,7 @@ def SimpleResNet(sample_shape, res_block=6):
         o = tf.keras.layers.Conv1D(128,3,1,'same',activation='relu')(o)
         inp_ = tf.keras.layers.Add()([inp_,o])
     o = tf.keras.layers.Conv1D(1,1,1,'same')(o)
-    return tf.keras.Model(inputs=[input,embedding],outputs=o)
+    return tf.keras.Model(inputs=[input,embedding],outputs=o,name="SimpleResNet")
 
 def SimpleRecurrentResNet(sample_shape, res_block=6):
     input = tf.keras.layers.Input(sample_shape)
@@ -99,10 +99,10 @@ def SimpleRecurrentResNet(sample_shape, res_block=6):
         o = tf.keras.layers.LSTM(128,return_sequences=True)(o)
         inp_ = tf.keras.layers.Add()([inp_,o])
     o = tf.keras.layers.LSTM(1,return_sequences=True)(o)
-    return tf.keras.Model(inputs=[input,embedding],outputs=o)
+    return tf.keras.Model(inputs=[input,embedding],outputs=o,name="SimpleRecurrentNet")
 
 
-def DnCNN(sample_shape, nlayers=6):
+def DnCNN(sample_shape, nlayers=18):
     input = tf.keras.layers.Input(sample_shape)
     embedding = tf.keras.layers.Input(128)
     emb = tf.keras.layers.Lambda(lambda x:tf.expand_dims(x,axis=1))(embedding)        # (BS,1,128)
@@ -112,6 +112,6 @@ def DnCNN(sample_shape, nlayers=6):
     for i in range(nlayers):
         o = tf.keras.layers.Conv1D(128,3,1,'same',activation='relu')(o)
     o = tf.keras.layers.Conv1D(1,1,1,'same')(o)
-    return tf.keras.Model(inputs=[input,embedding],outputs=o)
+    return tf.keras.Model(inputs=[input,embedding],outputs=o,name="DnCNN")
 
 
