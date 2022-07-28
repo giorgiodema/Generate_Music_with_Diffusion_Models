@@ -6,6 +6,8 @@ import os
 import subprocess
 from params import params
 
+tf.random.set_seed(2)
+
 ds = get_unlabelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"])
 it = iter(ds)
 x_0 = next(it)
@@ -21,7 +23,6 @@ beta_hat = get_beta_hat(alpha_hat,beta)
 for i in range(params["DIFF_STEPS"]):
     t = i
     print(f"\n\n--------------- DIFF STEP {t:3d} ---------------\n\n")
-    eps = sample_gaussian_noise(tf.shape(x_0))
-    inp = forward(x_0,alpha_hat,t)
+    inp,_ = forward(x_0,alpha_hat,t)
     wav = get_wav(inp[0],SR//params["DOWNSAMPLE"])
     subprocess.run(["ffplay","-"],input=wav.numpy())
