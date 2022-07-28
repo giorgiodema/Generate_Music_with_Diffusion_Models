@@ -52,7 +52,7 @@ def get_alpha_hat(alpha):
 def forward(x_0,alpha_hat,t):
     eps = sample_gaussian_noise(tf.shape(x_0))
     inp = tf.math.sqrt(alpha_hat[t]) * x_0 + tf.math.sqrt(1. - alpha_hat[t]) * eps
-    return inp
+    return inp,eps
 
 def train(  data:tf.data.Dataset, 
             diffusion_steps:int,
@@ -74,15 +74,14 @@ def train(  data:tf.data.Dataset,
             # sample x_0 from qdata and eps from N_0_1
             for step, x_0 in enumerate(data):
                 t = sample_diffusion_step(diffusion_steps)
-                eps = sample_gaussian_noise(tf.shape(x_0))
-                inp = forward(x_0,alpha_hat,t)
+                inp,eps = forward(x_0,alpha_hat,t)
                 # DEBUG #
                 #wav = get_wav(inp[0],SR//params["DOWNSAMPLE"])
                 #subprocess.run(["ffplay","-"],input=wav.numpy())
                 # DEBUG #
                 t_enc = encode(t,step_emb_dim)
-                t_enc = tf.expand_dims(t_enc,0)                  # Only for SimpleResNet
-                t_enc = tf.repeat(t_enc,tf.shape(x_0)[0],axis=0) # Only for SimpleResNet
+                t_enc = tf.expand_dims(t_enc,0)                  
+                t_enc = tf.repeat(t_enc,tf.shape(x_0)[0],axis=0) 
                 with tf.GradientTape() as tape:
                     o = model([inp,t_enc])
                     # DEBUG #
