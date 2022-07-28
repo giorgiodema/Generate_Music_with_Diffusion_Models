@@ -55,8 +55,6 @@ class DiffWaveNet(tf.keras.Model):
         input = inputs[0]
         step_embedding = inputs[1]
         input = self.input_conv(input)                             # (B,L,C)
-        emb = tf.expand_dims(step_embedding,0)                     # (1,128)
-        emb = tf.repeat(emb,repeats=tf.shape(input)[0],axis=0)     # (B,128)
         emb = self.dens_emb_1(emb)
         emb = self.dens_emb_2(emb)
         res_input = input
@@ -72,3 +70,48 @@ class DiffWaveNet(tf.keras.Model):
         out = self.out_conv1(out)                       # (B,L,C)
         out = self.out_conv2(out)                       # (B,L,1)
         return out
+
+def SimpleResNet(sample_shape, res_block=6):
+    input = tf.keras.layers.Input(sample_shape)
+    embedding = tf.keras.layers.Input(128)
+    emb = tf.keras.layers.Lambda(lambda x:tf.expand_dims(x,axis=1))(embedding)        # (BS,1,128)
+    emb = tf.keras.layers.Lambda(lambda x:tf.repeat(x,sample_shape[0],axis=1))(emb)   # (BS,L,128)
+    inp = tf.keras.layers.Conv1D(128,3,1,'same',activation='relu')(input)              # (BS,L,128)
+    inp_ = tf.keras.layers.Add()([inp,emb])                                            # (BS,L,128)
+    for i in range(res_block):
+        o = tf.keras.layers.Conv1D(128,3,1,'same',activation='relu')(inp_)
+        o = tf.keras.layers.Conv1D(128,3,1,'same',activation='relu')(o)
+        o = tf.keras.layers.Conv1D(128,3,1,'same',activation='relu')(o)
+        inp_ = tf.keras.layers.Add()([inp_,o])
+    o = tf.keras.layers.Conv1D(1,1,1,'same')(o)
+    return tf.keras.Model(inputs=[input,embedding],outputs=o)
+
+def SimpleRecurrentResNet(sample_shape, res_block=6):
+    input = tf.keras.layers.Input(sample_shape)
+    embedding = tf.keras.layers.Input(128)
+    emb = tf.keras.layers.Lambda(lambda x:tf.expand_dims(x,axis=1))(embedding)        # (BS,1,128)
+    emb = tf.keras.layers.Lambda(lambda x:tf.repeat(x,sample_shape[0],axis=1))(emb)   # (BS,L,128)
+    inp = tf.keras.layers.LSTM(128,return_sequences=True)(input)                      # (BS,L,128)             
+    inp_ = tf.keras.layers.Add()([inp,emb])                                           # (BS,L,128)
+    for i in range(res_block):
+        o = tf.keras.layers.LSTM(128,return_sequences=True)(inp_)
+        o = tf.keras.layers.LSTM(128,return_sequences=True)(o)
+        o = tf.keras.layers.LSTM(128,return_sequences=True)(o)
+        inp_ = tf.keras.layers.Add()([inp_,o])
+    o = tf.keras.layers.LSTM(1,return_sequences=True)(o)
+    return tf.keras.Model(inputs=[input,embedding],outputs=o)
+
+
+def DnCNN(sample_shape, nlayers=6):
+    input = tf.keras.layers.Input(sample_shape)
+    embedding = tf.keras.layers.Input(128)
+    emb = tf.keras.layers.Lambda(lambda x:tf.expand_dims(x,axis=1))(embedding)        # (BS,1,128)
+    emb = tf.keras.layers.Lambda(lambda x:tf.repeat(x,sample_shape[0],axis=1))(emb)   # (BS,L,128)
+    inp = tf.keras.layers.Conv1D(128,3,1,'same',activation='relu')(input)              # (BS,L,128)
+    o= tf.keras.layers.Add()([inp,emb])                                           # (BS,L,128)
+    for i in range(nlayers):
+        o = tf.keras.layers.Conv1D(128,3,1,'same',activation='relu')(o)
+    o = tf.keras.layers.Conv1D(1,1,1,'same')(o)
+    return tf.keras.Model(inputs=[input,embedding],outputs=o)
+
+

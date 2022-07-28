@@ -81,6 +81,8 @@ def train(  data:tf.data.Dataset,
                 #subprocess.run(["ffplay","-"],input=wav.numpy())
                 # DEBUG #
                 t_enc = encode(t,step_emb_dim)
+                t_enc = tf.expand_dims(t_enc,0)                  # Only for SimpleResNet
+                t_enc = tf.repeat(t_enc,tf.shape(x_0)[0],axis=0) # Only for SimpleResNet
                 with tf.GradientTape() as tape:
                     o = model([inp,t_enc])
                     # DEBUG #

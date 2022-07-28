@@ -1,5 +1,5 @@
 params = {
-    "BS":16,
+    "BS":4,
     "DIFF_STEPS":20,
     "DEPTH":6,
     "CHANNELS":64,
