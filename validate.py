@@ -7,7 +7,7 @@ from params import params
 
 tf.get_logger().setLevel('ERROR')
 
-ELEMENT_SHAPE = (params["BS"],params["SR"]//params["NSPLITS"],1)
+ELEMENT_SHAPE = (params["BS"],(params["SR"]//params["NSPLITS"])//params["DOWNSAMPLE"]+1,1)
 RET_SEQ=False
 PREFIX="__best__" #"__last__"
 

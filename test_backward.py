@@ -6,10 +6,9 @@ import os
 import subprocess
 from params import params
 
-START_STEP = 50
-ELEMENT_SHAPE = (4, 73334, 1)
+START_STEP = 10
 PREFIX="__best__"#"__last__"
-ELEMENT_SHAPE = (params["BS"],params["SR"]//params["NSPLITS"],1)
+ELEMENT_SHAPE = (params["BS"],(params["SR"]//params["NSPLITS"])//params["DOWNSAMPLE"]+1,1)
 
 ds = get_unlabelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"])
 it = iter(ds)

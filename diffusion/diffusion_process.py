@@ -2,6 +2,9 @@ import tensorflow as tf
 from tensorflow_probability.python.distributions import MultivariateNormalDiag
 from diffusion.positional_encoder import encode
 import numpy as np
+from data.dataset import *
+from params import params
+import subprocess
 
 def variance_schedule(diffusion_steps):
     """
@@ -73,9 +76,17 @@ def train(  data:tf.data.Dataset,
                 t = sample_diffusion_step(diffusion_steps)
                 eps = sample_gaussian_noise(tf.shape(x_0))
                 inp = forward(x_0,alpha_hat,t)
+                # DEBUG #
+                #wav = get_wav(inp[0],SR//params["DOWNSAMPLE"])
+                #subprocess.run(["ffplay","-"],input=wav.numpy())
+                # DEBUG #
                 t_enc = encode(t,step_emb_dim)
                 with tf.GradientTape() as tape:
                     o = model([inp,t_enc])
+                    # DEBUG #
+                    #wav = get_wav(o[0],SR//params["DOWNSAMPLE"])
+                    #subprocess.run(["ffplay","-"],input=wav.numpy())
+                    # DEBUG #
                     l = tf.norm(eps-o,ord=2)
                     l = tf.reduce_mean(l)
                 grads = tape.gradient(l, model.trainable_weights)

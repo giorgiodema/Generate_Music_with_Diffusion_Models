@@ -89,10 +89,12 @@ def get_unlabelled_dataset(bs=None,nsplits=1,downsample=1):
         ds = ds.map(lambda x:get_waveform_split(x,1,0,downsample))
     elif nsplits > 1:
         datasets = []
+        samples_per_split = NSAMPLES//nsplits
         for splitid in range(nsplits):
-            ds = tf.data.Dataset.from_tensor_slices(filenames)
-            ds = ds.map(lambda x: get_waveform_split(x,nsplits,splitid,downsample))
-            datasets.append(ds)
+            if samples_per_split*splitid + samples_per_split < NSAMPLES:
+                ds = tf.data.Dataset.from_tensor_slices(filenames)
+                ds = ds.map(lambda x: get_waveform_split(x,nsplits,splitid,downsample))
+                datasets.append(ds)
         ds = datasets[0]
         for dsp in datasets[1:]:
             ds = ds.concatenate(dsp)
