@@ -21,7 +21,7 @@ for i,x_0 in enumerate(it):
 
 net =  DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
 
-ELEMENT_SHAPE = (params["BS"],(params["SR"]//params["NSPLITS"])//params["DOWNSAMPLE"]+1,1)
+NSAMPLES = 660000
 beta = variance_schedule(params["DIFF_STEPS"])
 alpha = get_alpha(beta)
 alpha_hat = get_alpha_hat(alpha)
@@ -42,6 +42,6 @@ net.load_weights(f"test/model_test/{net.name}")
 
 while True:
     print("-> Listening Generated Song")
-    x_0_gen = backward_process(net,(1,330000,1),params["DIFF_STEPS"])
+    x_0_gen = backward_process(net,(1,NSAMPLES,1),params["DIFF_STEPS"])
     wav = get_wav(x_0_gen[0],SR//params["DOWNSAMPLE"])
     subprocess.run(["ffplay","-"],input=wav.numpy())
