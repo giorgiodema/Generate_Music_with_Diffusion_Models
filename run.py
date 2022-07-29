@@ -15,5 +15,5 @@ train(
     net,
     tf.keras.optimizers.Adam(learning_rate=2*10**-4),
     str(params),
-    epochs=1000
+    training_steps=2 * 10**6
 )

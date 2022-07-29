@@ -60,7 +60,7 @@ def train(  data:tf.data.Dataset,
             opt:tf.keras.optimizers.Optimizer,
             model_name:str,
             step_emb_dim:int=128,
-            epochs=100,
+            training_steps = 10**6,
             print_every=10):
 
     beta = variance_schedule(diffusion_steps)
@@ -69,50 +69,48 @@ def train(  data:tf.data.Dataset,
     best_ep_loss = tf.convert_to_tensor(np.inf)
     curr_ep_loss = tf.zeros_like(best_ep_loss)
     
-    for ep in range(epochs):
-        try:
-            # sample x_0 from qdata and eps from N_0_1
-            for step, x_0 in enumerate(data):
-                t = sample_diffusion_step(diffusion_steps)
-                inp,eps = forward(x_0,alpha_hat,t)
-                # DEBUG #
-                #wav = get_wav(inp[0],SR//params["DOWNSAMPLE"])
-                #subprocess.run(["ffplay","-"],input=wav.numpy())
-                # DEBUG #
-                t_enc = encode(t,step_emb_dim)
-                t_enc = tf.expand_dims(t_enc,0)                  
-                t_enc = tf.repeat(t_enc,tf.shape(x_0)[0],axis=0) 
-                with tf.GradientTape() as tape:
-                    o = model([inp,t_enc])
-                    # DEBUG #
-                    #wav = get_wav(o[0],SR//params["DOWNSAMPLE"])
-                    #subprocess.run(["ffplay","-"],input=wav.numpy())
-                    # DEBUG #
-                    l = tf.norm(eps-o,ord=2)
-                    l = tf.reduce_mean(l)
-                grads = tape.gradient(l, model.trainable_weights)
-                opt.apply_gradients(zip(grads, model.trainable_weights))
-                # tf.reduce_sum(tf.concat(list(map(lambda x:tf.abs(tf.reshape(x,-1)),list(filter(lambda x:x!=None,grads)))),axis=0))
-                curr_ep_loss += l
+    step = 0
+    it = iter(data)
+    try:
+        # sample x_0 from qdata and eps from N_0_1
+        x_0 = next(it)
+        t = sample_diffusion_step(diffusion_steps)
+        inp,eps = forward(x_0,alpha_hat,t)
+        # DEBUG #
+        #wav = get_wav(inp[0],SR//params["DOWNSAMPLE"])
+        #subprocess.run(["ffplay","-"],input=wav.numpy())
+        # DEBUG #
+        t_enc = encode(t,step_emb_dim)
+        t_enc = tf.expand_dims(t_enc,0)                  
+        t_enc = tf.repeat(t_enc,tf.shape(x_0)[0],axis=0) 
+        with tf.GradientTape() as tape:
+            o = model([inp,t_enc])
+            # DEBUG #
+            #wav = get_wav(o[0],SR//params["DOWNSAMPLE"])
+            #subprocess.run(["ffplay","-"],input=wav.numpy())
+            # DEBUG #
+            l = tf.norm(eps-o,ord=2)
+            l = tf.reduce_mean(l)
+        grads = tape.gradient(l, model.trainable_weights)
+        opt.apply_gradients(zip(grads, model.trainable_weights))
+        # tf.reduce_sum(tf.concat(list(map(lambda x:tf.abs(tf.reshape(x,-1)),list(filter(lambda x:x!=None,grads)))),axis=0))
+        curr_ep_loss += l
 
-                # Log every print_every batches.
-                if step % print_every == 0:
-                    tf.print(
-                        "Training loss [step: %5d, ep: %5d] = %.4f"
-                        % (step,ep, float(l))
-                    )
-            curr_ep_loss = curr_ep_loss / (step + 1)
-            tf.print("------------------------------")
-            tf.print("EPOCH LOSS: %4f"%(curr_ep_loss))
+        # Log every print_every batches.
+        if step % print_every == 0:
+            tf.print(
+                "Training loss [step: %7d/%7d] = %.4f"
+                % (step,training_steps, float(l))
+            )
             with open(f"log/{model_name}.txt","a") as f:
-                f.write(f"{curr_ep_loss}\n")
-            if curr_ep_loss < best_ep_loss:
-                tf.print("Loss decreased: %4f --> %4f"%(best_ep_loss,curr_ep_loss))
-                best_ep_loss = curr_ep_loss
-                curr_ep_loss = tf.zeros_like(best_ep_loss)
-                model.save(f"ckpt/__best__{model_name}")
-        except KeyboardInterrupt:
-            model.save(f"ckpt/__last__{model_name}")
+                f.write(f"{l},")
+
+        step += 1
+    except KeyboardInterrupt:
+        model.save(f"ckpt/__last__{model_name}")
+    except StopIteration:
+        it = iter(data)
+        model.save(f"ckpt/__step_{step}__{model_name}")
 
     
 def train_single_sample(x_0:tf.Tensor, 
