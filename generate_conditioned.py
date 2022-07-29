@@ -1,6 +1,5 @@
 from diffusion.diffusion_process import *
-from network.model import DiffWaveNet, DnCNN, SimpleRecurrentResNet, SimpleResNet
-from data.dataset import get_unlabelled_dataset
+from network.model import ConditionedDiffWaveNet
 import tensorflow as tf
 import os
 from params import params
@@ -13,8 +12,8 @@ tf.random.set_seed(2)
 #     RESTORE THE MODEL
 training_step_ckpt=400 
 ##################################################
-
-net =  DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
+                       
+net =  ConditionedDiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
 params["MODEL_NAME"] = net.name
 
 NSAMPLES = 660000
@@ -26,11 +25,11 @@ beta_hat = get_beta_hat(alpha_hat,beta)
 print("-------------------------------------------")
 print("-------------------------------------------")
 print(f"Model:{net.name}")
-
 net.load_weights(f"ckpt/__step_{training_step_ckpt}__{params}")
 
 while True:
     print("-> Listening Generated Song")
-    x_0_gen = backward_process(net,(1,NSAMPLES,1),params["DIFF_STEPS"])
+    genre = input("Genre:")
+    x_0_gen = conditioned_backward_process(net,(1,NSAMPLES,1),genre,params["DIFF_STEPS"])
     wav = get_wav(x_0_gen[0],SR//params["DOWNSAMPLE"])
     subprocess.run(["ffplay","-"],input=wav.numpy())

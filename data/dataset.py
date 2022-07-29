@@ -5,6 +5,11 @@ import numpy as np
 NSAMPLES=660000
 SR = 22050
 
+labels = tf.constant(["blues","classical","country","disco","hiphop","jazz","metal","pop","reggae","rock"])
+indices = tf.constant([0,1,2,3,4,5,6,7,8,9])
+
+
+
 def get_filenames():
     filenames = []
     base_path = "dataset/Data/genres_original"
@@ -133,7 +138,11 @@ def get_labelled_dataset(bs=None,nsplits=1,downsample=1):
             ds = ds.concatenate(dsp)
     else:
         raise ValueError("Invalid argument nsplit")
-    
+    table = tf.lookup.StaticHashTable(
+        tf.lookup.KeyValueTensorInitializer(labels,indices),
+        -1
+    )
+    ds = ds.map(lambda x,y:(x,table.lookup(y)))
     if bs:
         ds = ds.batch(bs,drop_remainder=True)
     return ds
@@ -158,7 +167,7 @@ if __name__=="__main__":
         for i in range(x.shape[0]):
             
             wav = get_wav(x[i],SR//downsample)
-            print(f"-----------------\n{l[i]}\n-----------------\n")
+            print(f"-----------------\n{labels[l[i]]}\n-----------------\n")
             subprocess.run(["ffplay","-"],input=wav.numpy())
 
             """
