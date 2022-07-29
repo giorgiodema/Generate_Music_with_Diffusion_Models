@@ -11,7 +11,7 @@ ELEMENT_SHAPE = (params["BS"],(params["SR"]//params["NSPLITS"])//params["DOWNSAM
 net = ConditionedDiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
 params["MODEL_NAME"] = net.name
 train_conditioned(
-    get_labelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"]).take(100),
+    get_labelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"]),
     params["DIFF_STEPS"],
     net,
     tf.keras.optimizers.Adam(learning_rate=2*10**-4),
