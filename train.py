@@ -15,6 +15,5 @@ train(
     params["DIFF_STEPS"],
     net,
     tf.keras.optimizers.Adam(learning_rate=2*10**-4),
-    str(params),
-    training_steps=2 * 10**6
+    str(params)
 )

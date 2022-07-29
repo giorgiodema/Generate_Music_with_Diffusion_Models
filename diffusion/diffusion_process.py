@@ -60,7 +60,6 @@ def train(  data:tf.data.Dataset,
             opt:tf.keras.optimizers.Optimizer,
             model_name:str,
             step_emb_dim:int=128,
-            training_steps = 10**6,
             print_every=10):
 
     beta = variance_schedule(diffusion_steps)
@@ -100,8 +99,8 @@ def train(  data:tf.data.Dataset,
             # Log every print_every batches.
             if step % print_every == 0:
                 tf.print(
-                    "Training loss [step: %7d/%7d] = %.4f"
-                    % (step,training_steps, float(l))
+                    "Training loss [step: %10d] = %.4f"
+                    % (step, float(l))
                 )
                 with open(f"log/{model_name}.txt","a") as f:
                     f.write(f"{l},")
