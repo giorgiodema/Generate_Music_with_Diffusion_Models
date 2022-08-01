@@ -58,15 +58,18 @@ for net in nets:
     
     x_0_forw,_ = forward(x_0,alpha_hat,START_STEP)
     print("-> Listening Noisy song")
-    wav = get_wav(x_0_forw[0],SR//params["DOWNSAMPLE"])
-    subprocess.run(["ffplay","-"],input=wav.numpy())
+    for i in range(x_0_forw.shape[0]):
+        wav = get_wav(x_0_forw[i],SR//params["DOWNSAMPLE"])
+        subprocess.run(["ffplay","-"],input=wav.numpy())
 
     x_0_back = backward_process_from(net,ELEMENT_SHAPE,params["DIFF_STEPS"],x_0_forw,START_STEP)
     print("-> Listening Denoised")
-    wav = get_wav(x_0_back[0],SR//params["DOWNSAMPLE"])
-    subprocess.run(["ffplay","-"],input=wav.numpy())
+    for i in range(x_0_back.shape[0]):
+        wav = get_wav(x_0_back[i],SR//params["DOWNSAMPLE"])
+        subprocess.run(["ffplay","-"],input=wav.numpy())
 
     print("-> Listening Generated Song")
     x_0_gen = backward_process(net,ELEMENT_SHAPE,params["DIFF_STEPS"])
-    wav = get_wav(x_0_gen[0],SR//params["DOWNSAMPLE"])
-    subprocess.run(["ffplay","-"],input=wav.numpy())
+    for i in range(x_0_gen.shape[0]):
+        wav = get_wav(x_0_gen[i],SR//params["DOWNSAMPLE"])
+        subprocess.run(["ffplay","-"],input=wav.numpy())

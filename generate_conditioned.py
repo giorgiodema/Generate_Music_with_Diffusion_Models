@@ -10,7 +10,7 @@ tf.random.set_seed(2)
 
 # NB: SELECT THE TRAIN STEP FROM WHICH YOU WANT TO
 #     RESTORE THE MODEL
-training_step_ckpt=400 
+training_step_ckpt=1414112
 ##################################################
                        
 net =  ConditionedDiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
@@ -25,7 +25,7 @@ beta_hat = get_beta_hat(alpha_hat,beta)
 print("-------------------------------------------")
 print("-------------------------------------------")
 print(f"Model:{net.name}")
-net.load_weights(f"ckpt/__step_{training_step_ckpt}__{params}")
+ret = net.load_weights(f"ckpt/__step_{training_step_ckpt}__{params}")
 
 while True:
     print("-> Listening Generated Song")

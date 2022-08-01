@@ -1,5 +1,4 @@
 import tensorflow as tf
-from tensorflow_probability.python.distributions import MultivariateNormalDiag
 from diffusion.positional_encoder import encode
 import numpy as np
 from data.dataset import *
