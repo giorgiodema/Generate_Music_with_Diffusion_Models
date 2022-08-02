@@ -6,6 +6,7 @@ import os
 from params import params
 
 tf.get_logger().setLevel('ERROR')
+tf.random.set_seed(2)
 
 ELEMENT_SHAPE = (params["BS"],(params["SR"]//params["NSPLITS"])//params["DOWNSAMPLE"]+1,1)
 net = ConditionedDiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])

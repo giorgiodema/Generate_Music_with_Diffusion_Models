@@ -11,7 +11,7 @@ tf.random.set_seed(2)
 
 # NB: SELECT THE TRAIN STEP FROM WHICH YOU WANT TO
 #     RESTORE THE MODEL
-training_step_ckpt=400 
+training_step_ckpt=57400
 ##################################################
 
 net =  DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])

@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 params["MODEL_NAME"] = "diff_wave_net"
+TRAIN_SIZE = 100 #1248#1498
+PRINT_EVERY = 10
 
 with open(f"log/{params}.txt", "r") as f:
     l = f.read().split(",")
@@ -12,12 +14,12 @@ plt.plot(l)
 plt.title(f'{params["MODEL_NAME"]} train loss')
 plt.show()
 
-resolution = 1248#1498
-a = np.repeat(np.array(l),10)
-size = (a.shape[0]//resolution) * resolution
+
+a = np.repeat(np.array(l),PRINT_EVERY)
+size = (a.shape[0]//TRAIN_SIZE) * TRAIN_SIZE
 a = a[0:size]
-a = np.reshape(a,(a.shape[0]//resolution,resolution))
+a = np.reshape(a,(a.shape[0]//TRAIN_SIZE,TRAIN_SIZE))
 a = np.mean(a,axis=1,keepdims=False)
 plt.plot(a)
-plt.title(f'{params["MODEL_NAME"]} train loss avg {resolution}')
+plt.title(f'{params["MODEL_NAME"]} train loss avg {TRAIN_SIZE}')
 plt.show()
