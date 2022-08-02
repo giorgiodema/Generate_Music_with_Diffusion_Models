@@ -53,6 +53,17 @@ def forward(x_0,alpha_hat,t):
     inp = tf.math.sqrt(alpha_hat[t]) * x_0 + tf.math.sqrt(1. - alpha_hat[t]) * eps
     return inp,eps
 
+@tf.function
+def train_step(model,inp,t_enc,eps):
+    o = model([inp,t_enc])
+    # DEBUG #
+    #wav = get_wav(o[0],SR//params["DOWNSAMPLE"])
+    #subprocess.run(["ffplay","-"],input=wav.numpy())
+    # DEBUG #
+    l = tf.norm(eps-o,ord=2)
+    l = tf.reduce_mean(l)
+    return l
+
 def train(  data:tf.data.Dataset, 
             diffusion_steps:int,
             model:tf.keras.Model,
@@ -83,13 +94,7 @@ def train(  data:tf.data.Dataset,
             t_enc = tf.expand_dims(t_enc,0)                  
             t_enc = tf.repeat(t_enc,tf.shape(x_0)[0],axis=0) 
             with tf.GradientTape() as tape:
-                o = model([inp,t_enc])
-                # DEBUG #
-                #wav = get_wav(o[0],SR//params["DOWNSAMPLE"])
-                #subprocess.run(["ffplay","-"],input=wav.numpy())
-                # DEBUG #
-                l = tf.norm(eps-o,ord=2)
-                l = tf.reduce_mean(l)
+                l = train_step(model,inp,t_enc,eps)
             grads = tape.gradient(l, model.trainable_weights)
             opt.apply_gradients(zip(grads, model.trainable_weights))
             # tf.reduce_sum(tf.concat(list(map(lambda x:tf.abs(tf.reshape(x,-1)),list(filter(lambda x:x!=None,grads)))),axis=0))

@@ -11,7 +11,7 @@ tf.random.set_seed(2)
 
 # NB: SELECT THE TRAIN STEP FROM WHICH YOU WANT TO
 #     RESTORE THE MODEL
-training_step_ckpt=57400
+training_step_ckpt=4992
 ##################################################
 
 net =  DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
@@ -30,7 +30,12 @@ print(f"Model:{net.name}")
 net.load_weights(f"ckpt/__step_{training_step_ckpt}__{params}")
 
 while True:
-    print("-> Listening Generated Song")
-    x_0_gen = backward_process(net,(1,NSAMPLES,1),params["DIFF_STEPS"])
-    wav = get_wav(x_0_gen[0],SR//params["DOWNSAMPLE"])
-    subprocess.run(["ffplay","-"],input=wav.numpy())
+    try:
+        print("-> Listening Generated Song")
+        x_0_gen = backward_process(net,(1,NSAMPLES,1),params["DIFF_STEPS"])
+        wav = get_wav(x_0_gen[0],SR//params["DOWNSAMPLE"])
+        subprocess.run(["ffplay","-"],input=wav.numpy())
+
+    except KeyboardInterrupt:
+        break
+net.summary()

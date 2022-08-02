@@ -3,8 +3,19 @@ from network.model import DiffWaveNet, DnCNN, SimpleRecurrentResNet, SimpleResNe
 from data.dataset import get_unlabelled_dataset
 import tensorflow as tf
 import os
-from params import params
 import matplotlib.pyplot as plt
+
+params = {
+    "BS":4,
+    "DIFF_STEPS":20,
+    "DEPTH":10,
+    "CHANNELS":64,
+    "KERNEL_SIZE":3,
+    "NSPLITS":6,
+    "DOWNSAMPLE":3,
+    "SR":22050,
+    "NSAMPLES":660000
+}
 
 tf.get_logger().setLevel('ERROR')
 tf.random.set_seed(2)
@@ -19,7 +30,7 @@ for i,x_0 in enumerate(it):
 #    wav = get_wav(x_0[i],SR//params["DOWNSAMPLE"])
 #    subprocess.run(["ffplay","-"],input=wav.numpy())
 
-ELEMENT_SHAPE = (params["BS"],(params["SR"]//params["NSPLITS"])//params["DOWNSAMPLE"]+1,1)
+ELEMENT_SHAPE = (params["BS"],(params["NSAMPLES"]//params["NSPLITS"])//params["DOWNSAMPLE"]+1,1)
 nets =[ DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"]),
         SimpleResNet((ELEMENT_SHAPE[1],1)),
         DnCNN((ELEMENT_SHAPE[1],1))]
@@ -59,17 +70,17 @@ for net in nets:
     x_0_forw,_ = forward(x_0,alpha_hat,START_STEP)
     print("-> Listening Noisy song")
     for i in range(x_0_forw.shape[0]):
-        wav = get_wav(x_0_forw[i],SR//params["DOWNSAMPLE"])
+        wav = get_wav(x_0_forw[i],params["SR"]//params["DOWNSAMPLE"])
         subprocess.run(["ffplay","-"],input=wav.numpy())
 
     x_0_back = backward_process_from(net,ELEMENT_SHAPE,params["DIFF_STEPS"],x_0_forw,START_STEP)
     print("-> Listening Denoised")
     for i in range(x_0_back.shape[0]):
-        wav = get_wav(x_0_back[i],SR//params["DOWNSAMPLE"])
+        wav = get_wav(x_0_back[i],params["SR"]//params["DOWNSAMPLE"])
         subprocess.run(["ffplay","-"],input=wav.numpy())
 
     print("-> Listening Generated Song")
     x_0_gen = backward_process(net,ELEMENT_SHAPE,params["DIFF_STEPS"])
     for i in range(x_0_gen.shape[0]):
-        wav = get_wav(x_0_gen[i],SR//params["DOWNSAMPLE"])
+        wav = get_wav(x_0_gen[i],params["SR"]//params["DOWNSAMPLE"])
         subprocess.run(["ffplay","-"],input=wav.numpy())

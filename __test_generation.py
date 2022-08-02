@@ -3,8 +3,19 @@ from network.model import DiffWaveNet, DnCNN, SimpleRecurrentResNet, SimpleResNe
 from data.dataset import get_unlabelled_dataset
 import tensorflow as tf
 import os
-from params import params
 import matplotlib.pyplot as plt
+
+params = {
+    "BS":4,
+    "DIFF_STEPS":20,
+    "DEPTH":10,
+    "CHANNELS":64,
+    "KERNEL_SIZE":3,
+    "NSPLITS":6,
+    "DOWNSAMPLE":3,
+    "SR":22050,
+    "NSAMPLES":660000
+}
 
 tf.get_logger().setLevel('ERROR')
 tf.random.set_seed(2)
@@ -43,5 +54,5 @@ net.load_weights(f"test/model_test/{net.name}")
 while True:
     print("-> Listening Generated Song")
     x_0_gen = backward_process(net,(1,NSAMPLES,1),params["DIFF_STEPS"])
-    wav = get_wav(x_0_gen[0],SR//params["DOWNSAMPLE"])
+    wav = get_wav(x_0_gen[0],params["SR"]//params["DOWNSAMPLE"])
     subprocess.run(["ffplay","-"],input=wav.numpy())

@@ -161,8 +161,8 @@ def get_min_max_lengths(fnames):
 if __name__=="__main__":
 
     import subprocess
-    downsample = 1
-    ds = get_labelled_dataset(4,nsplits=1,downsample=downsample)
+    downsample = 3
+    ds = get_labelled_dataset(4,nsplits=12,downsample=downsample)
     for x,l in ds:
         for i in range(x.shape[0]):
             

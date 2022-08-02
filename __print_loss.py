@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 params["MODEL_NAME"] = "diff_wave_net"
-TRAIN_SIZE = 100 #1248#1498
+TRAIN_SIZE = 1248#1498
 PRINT_EVERY = 10
 
 with open(f"log/{params}.txt", "r") as f:
