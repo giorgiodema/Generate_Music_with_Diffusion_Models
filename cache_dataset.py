@@ -6,6 +6,6 @@ import os
 from params import params
 
 
-ds = get_unlabelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"])
+ds = get_unlabelled_dataset(params["BS"],nsplits=params["NSPLITS"],downsample=params["DOWNSAMPLE"]).take(10)
 tf.data.experimental.save(
 ds, "./dataset/unlabelled")

@@ -16,5 +16,10 @@ train(
     params["DIFF_STEPS"],
     net,
     tf.keras.optimizers.Adam(learning_rate=2*10**-4),
-    str(params)
+    net.name,
+    ckpt_path="/media/giorgio/TOSHIBA EXT/ckpt",
+    print_every=100,
+    save_every=1000,
+    resume=False,
+    resume_ckpt=None
 )

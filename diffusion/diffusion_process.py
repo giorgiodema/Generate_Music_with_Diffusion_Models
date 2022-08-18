@@ -70,7 +70,11 @@ def train(  data:tf.data.Dataset,
             opt:tf.keras.optimizers.Optimizer,
             model_name:str,
             step_emb_dim:int=128,
-            print_every=10):
+            print_every=10,
+            save_every=None,
+            ckpt_path="./ckpt",
+            resume =False,
+            resume_ckpt = None):
 
     beta = variance_schedule(diffusion_steps)
     alpha = get_alpha(beta)
@@ -80,6 +84,10 @@ def train(  data:tf.data.Dataset,
     
     step = 0
     it = iter(data)
+
+    if resume:
+        model.load_weights(os.path.join(ckpt_path,f"__step_{resume_ckpt}__{model.name}"))
+        step = resume_ckpt
     while True:
         try:
             # sample x_0 from qdata and eps from N_0_1
@@ -108,13 +116,16 @@ def train(  data:tf.data.Dataset,
                 )
                 with open(f"log/{model_name}.txt","a") as f:
                     f.write(f"{l},")
+            if save_every and step%save_every==0:
+                model.save_weights(os.path.join(ckpt_path,f"__step_{step}__{model_name}"))
 
             step += 1
         except KeyboardInterrupt:
-            model.save_weights(f"ckpt/__last__{model_name}")
+            model.save_weights(os.path.join(ckpt_path,f"__step_{step}__{model_name}"))
         except StopIteration:
             it = iter(data)
-            model.save_weights(f"ckpt/__step_{step}__{model_name}")
+            if not save_every:
+                model.save_weights(os.path.join(ckpt_path,f"__step_{step}__{model_name}"))
 
 def train_conditioned(  data:tf.data.Dataset,
             diffusion_steps:int,

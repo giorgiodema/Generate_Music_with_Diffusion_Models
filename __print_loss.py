@@ -2,11 +2,11 @@ from params import params
 import matplotlib.pyplot as plt
 import numpy as np
 
-params["MODEL_NAME"] = "diff_wave_net"
-TRAIN_SIZE = 1248#1498
+params["MODEL_NAME"] = "diff_wave_net_unlabelled_10"
+TRAIN_SIZE = 10#1248#1498
 PRINT_EVERY = 10
 
-with open(f"log/{params}.txt", "r") as f:
+with open(f"log/{params['MODEL_NAME']}.txt", "r") as f:
     l = f.read().split(",")
 l = list(filter(lambda x:x!="",l))
 l = list(map(lambda x:float(x),l))

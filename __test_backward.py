@@ -7,8 +7,8 @@ import subprocess
 from params import params
 import math
 
-START_STEP = 10
-MODEL_STEP = 3744
+START_STEP = 5
+MODEL_STEP = 269568
 ELEMENT_SHAPE = (params["BS"],math.ceil((params["NSAMPLES"]//params["NSPLITS"])/params["DOWNSAMPLE"]),1)
 
 ds = tf.data.experimental.load("./dataset/unlabelled",tf.TensorSpec(shape=(params["BS"],math.ceil((params["NSAMPLES"]//params["NSPLITS"])/params["DOWNSAMPLE"]),1), dtype=tf.float32))

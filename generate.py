@@ -5,19 +5,21 @@ import tensorflow as tf
 import os
 from params import params
 import matplotlib.pyplot as plt
+import math
 
 tf.get_logger().setLevel('ERROR')
 tf.random.set_seed(2)
 
 # NB: SELECT THE TRAIN STEP FROM WHICH YOU WANT TO
 #     RESTORE THE MODEL
-training_step_ckpt=4992
+training_step_ckpt=1013000
 ##################################################
+ckpt_path = "/media/giorgio/TOSHIBA EXT/ckpt"
 
 net =  DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
 params["MODEL_NAME"] = net.name
 
-NSAMPLES = 660000
+NSAMPLES = math.ceil((params["NSAMPLES"]//params["NSPLITS"])/params["DOWNSAMPLE"])
 beta = variance_schedule(params["DIFF_STEPS"])
 alpha = get_alpha(beta)
 alpha_hat = get_alpha_hat(alpha)
@@ -27,7 +29,7 @@ print("-------------------------------------------")
 print("-------------------------------------------")
 print(f"Model:{net.name}")
 
-net.load_weights(f"ckpt/__step_{training_step_ckpt}__{params}")
+net.load_weights(os.path.join(ckpt_path,f"__step_{training_step_ckpt}__{net.name}"))
 
 while True:
     try:
