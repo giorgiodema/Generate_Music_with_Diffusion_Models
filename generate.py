@@ -12,9 +12,9 @@ tf.random.set_seed(2)
 
 # NB: SELECT THE TRAIN STEP FROM WHICH YOU WANT TO
 #     RESTORE THE MODEL
-training_step_ckpt=1013000
+training_step_ckpt=2075000
 ##################################################
-ckpt_path = "/media/giorgio/TOSHIBA EXT/ckpt"
+ckpt_path = "/media/giorgio/TOSHIBA EXT/ckpt_10"
 
 net =  DiffWaveNet(params["DEPTH"],params["CHANNELS"],params["KERNEL_SIZE"])
 params["MODEL_NAME"] = net.name
@@ -29,7 +29,7 @@ print("-------------------------------------------")
 print("-------------------------------------------")
 print(f"Model:{net.name}")
 
-net.load_weights(os.path.join(ckpt_path,f"__step_{training_step_ckpt}__{net.name}"))
+ret = net.load_weights(os.path.join(ckpt_path,f"__step_{training_step_ckpt}__{net.name}"))
 
 while True:
     try:

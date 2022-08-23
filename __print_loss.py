@@ -2,7 +2,7 @@ from params import params
 import matplotlib.pyplot as plt
 import numpy as np
 
-params["MODEL_NAME"] = "diff_wave_net_unlabelled_10"
+params["MODEL_NAME"] = "diff_wave_net"
 TRAIN_SIZE = 10#1248#1498
 PRINT_EVERY = 10
 
