@@ -74,7 +74,8 @@ def train(  data:tf.data.Dataset,
             save_every=None,
             ckpt_path="./ckpt",
             resume =False,
-            resume_ckpt = None):
+            resume_ckpt = None,
+            max_steps = 2000000):
 
     beta = variance_schedule(diffusion_steps)
     alpha = get_alpha(beta)
@@ -88,7 +89,7 @@ def train(  data:tf.data.Dataset,
     if resume:
         model.load_weights(os.path.join(ckpt_path,f"__step_{resume_ckpt}__{model.name}"))
         step = resume_ckpt
-    while True:
+    while step<max_steps:
         try:
             # sample x_0 from qdata and eps from N_0_1
             x_0 = next(it)
