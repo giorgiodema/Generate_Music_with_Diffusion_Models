@@ -12,7 +12,7 @@ tf.random.set_seed(2)
 
 # NB: SELECT THE TRAIN STEP FROM WHICH YOU WANT TO
 #     RESTORE THE MODEL
-training_step_ckpt=2517000
+training_step_ckpt=900000
 ##################################################
 ckpt_path = "/media/giorgio/TOSHIBA EXT/ckpt_10"
 
