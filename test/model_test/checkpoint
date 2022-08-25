@@ -1,0 +1,2 @@
+model_checkpoint_path: "diff_wave_net"
+all_model_checkpoint_paths: "diff_wave_net"

@@ -2,6 +2,3 @@ tmp/*
 dataset/*
 __pycache__/*
 .vscode/*
-ckpt/
-test/
-log/
