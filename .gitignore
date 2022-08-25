@@ -1,4 +1,4 @@
 tmp/*
-dataset/*
+dataset/unlabelled
 __pycache__/*
 .vscode/*
